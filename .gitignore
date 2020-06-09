@@ -1,0 +1,13 @@
+*.pdb
+*.cache
+*.user
+TestResults
+obj
+bin
+!/packages/*
+!/packages/*/*
+!/packages/*/*/*
+!/packages/*/*/*/*
+*.ttinclude
+/.vs
+*.suo
