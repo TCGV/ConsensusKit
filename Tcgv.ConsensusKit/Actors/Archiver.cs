@@ -4,32 +4,40 @@ using Tcgv.ConsensusKit.Control;
 
 namespace Tcgv.ConsensusKit.Actors
 {
-    public abstract class Archiver
+    public class Archiver
     {
         public Archiver()
         {
-            commited = new Dictionary<Instance, string>();
+            commited = new Dictionary<Instance, object>();
         }
 
-        public void Commit(Instance r, string v)
+        public virtual bool CanCommit(object value)
+        {
+            return true;
+        }
+
+        public void Commit(Instance r, object v)
         {
             commited.Add(r, v);
         }
-
-        public abstract bool IsValidProposal(string value);
 
         public bool IsCommited(Instance r)
         {
             return commited.ContainsKey(r);
         }
 
-        public IEnumerable<Instance> Query(string v)
+        public object Query(Instance r)
+        {
+            return commited[r];
+        }
+
+        public IEnumerable<Instance> Query(object v)
         {
             return commited
                 .Where(p => v.Equals(p.Value))
                 .Select(p => p.Key);
         }
 
-        private Dictionary<Instance, string> commited;
+        private Dictionary<Instance, object> commited;
     }
 }

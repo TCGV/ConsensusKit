@@ -10,12 +10,12 @@ namespace Tcgv.ConsensusKit.Exchange
             map = new Dictionary<MessageType, Dictionary<Instance, HashSet<Message>>>();
         }
 
-        public void Add(Message msg)
+        public void Add(Instance r, Message msg)
         {
             lock (map)
             {
-                EnsureMap(msg.Type, msg.Instance);
-                map[msg.Type][msg.Instance].Add(msg);
+                EnsureMap(msg.Type, r);
+                map[msg.Type][r].Add(msg);
             }
         }
 

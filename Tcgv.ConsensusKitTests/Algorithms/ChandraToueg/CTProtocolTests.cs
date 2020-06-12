@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
 {
@@ -15,7 +16,10 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
 
             var protocol = new CTProtocol(processes);
 
-            protocol.Execute(5, -1);
+            var instances = protocol.Execute(10, -1);
+
+            Assert.AreEqual(10, instances.Length);
+            Assert.IsTrue(instances.All(r => r.Value != null));
         }
     }
 }

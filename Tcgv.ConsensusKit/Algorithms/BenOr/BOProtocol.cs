@@ -4,15 +4,18 @@ using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
 
-namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
+namespace Tcgv.ConsensusKit.Algorithms.BenOr
 {
-    public class CTProtocol : Protocol
+    public class BOProtocol : Protocol
     {
-        public CTProtocol(CTProcess[] processes)
-            : base(processes) { }
+        public BOProtocol(BOProcess[] processes, int f)
+            : base(processes)
+        {
+            this.f = f;
+        }
 
-        public CTProtocol(IEnumerable<CTProcess> processes)
-            : base(processes.ToArray()) { }
+        public BOProtocol(IEnumerable<BOProcess> processes, int f)
+            : this(processes.ToArray(), f) { }
 
         public override Instance[] Execute(int iterations, int millisecondsTimeout)
         {
@@ -22,12 +25,11 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 
             for (int i = 0; i < iterations; i++)
             {
-                var coordinator = Processes[i % Processes.Length];
-
-                var r = new CTInstance(
+                var r = new BOInstance(
                     new HashSet<Process>(Processes),
-                    new HashSet<Process>(new[] { coordinator }),
-                    buffer
+                    new HashSet<Process>(),
+                    buffer,
+                    f: f
                 );
 
                 r.Execute(millisecondsTimeout);
@@ -36,5 +38,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 
             return instances;
         }
+
+        private int f;
     }
 }

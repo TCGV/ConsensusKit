@@ -11,6 +11,6 @@ namespace Tcgv.ConsensusKit.Control
 
         public Process[] Processes { get; }
 
-        public abstract void Execute(int iterations, int millisecondsTimeout);
+        public abstract Instance[] Execute(int iterations, int millisecondsTimeout);
     }
 }

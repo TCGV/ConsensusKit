@@ -14,23 +14,20 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 
         public override bool HasQuorum(HashSet<Message> msgs)
         {
-            var f = msgs.FirstOrDefault();
-            if (f != null)
+            var x = msgs.FirstOrDefault();
+            if (x != null)
             {
                 var mCount = msgs.Count;
                 var dCount = Deciders.Count;
                 var majority = Math.Ceiling((Proposers.Count + dCount) / 2.0d);
 
-                switch (f.Type)
+                switch (x.Type)
                 {
                     case MessageType.Propose:
-                        return mCount >= majority;
-                    case MessageType.Select:
-                        return mCount >= dCount;
                     case MessageType.Ack:
-                        return mCount >= majority;
                     case MessageType.Nack:
                         return mCount >= majority;
+                    case MessageType.Select:
                     case MessageType.Decide:
                         return mCount >= dCount;
                 }

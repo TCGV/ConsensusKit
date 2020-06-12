@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
+using Tcgv.ConsensusKit.Algorithms.Common;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
 
@@ -10,14 +10,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
     public class CTProcess : Process
     {
         public CTProcess()
-            : base(new CTArchiver()) { }
-
-        public override string GetProposal()
-        {
-            if (proposal == null)
-                proposal = Guid.NewGuid().ToString();
-            return proposal;
-        }
+            : base(new UniqueArchiver(), new RandomStringProposer()) { }
 
         public override void Bind(Instance r)
         {
@@ -27,70 +20,45 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
                 BindAsProcess(r);
         }
 
-        protected override void Start(Instance r)
-        {
-            var msg = new Message(
-                this, MessageType.Propose, r, GetProposal()
-            );
-            r.Broadcast(msg);
-        }
-
         private void BindAsCoordinator(Instance r)
         {
-            r.WaitQuorum(MessageType.Propose, (msgs) =>
+            r.WaitQuorum(MessageType.Propose, msgs =>
             {
                 var v = PickValue(
-                    msgs.Where(m => Archiver.IsValidProposal(m.Value))
+                    msgs.Where(m => Archiver.CanCommit(m.Value))
                 );
 
-                var msg = new Message(
-                    this, MessageType.Select, r, v
-                );
-
-                r.Broadcast(msg);
+                Broadcast(r, MessageType.Select, v);
             });
 
-            r.WaitQuorum(MessageType.Ack, (msgs) =>
+            r.WaitQuorum(MessageType.Ack, msgs =>
             {
-                proposal = PickValue(msgs);
-
-                var msg = new Message(
-                    this, MessageType.Decide, r, proposal
-                );
-
-                r.Broadcast(msg);
-
-                Terminate(r, proposal);
+                var v = PickValue(msgs);
+                Broadcast(r, MessageType.Decide, v);
+                Terminate(r, v);
             });
         }
 
         private void BindAsProcess(Instance r)
         {
-            r.WaitQuorum(MessageType.Select, (msgs) =>
+            r.WaitQuorum(MessageType.Select, msgs =>
             {
                 var v = msgs.Single().Value;
-
-                var msg = new Message(
-                    this, MessageType.Ack, r, v
-                );
-
-                r.Broadcast(msg);
+                Broadcast(r, MessageType.Ack, v);
             });
 
-            r.WaitQuorum(MessageType.Decide, (msgs) =>
+            r.WaitQuorum(MessageType.Decide, msgs =>
             {
                 var v = msgs.Single().Value;
                 Terminate(r, v);
             });
         }
 
-        private string PickValue(IEnumerable<Message> msgs)
+        private object PickValue(IEnumerable<Message> msgs)
         {
             return msgs
                 .OrderByDescending(x => x.Timestamp)
                 .FirstOrDefault()?.Value;
         }
-
-        private string proposal;
     }
 }

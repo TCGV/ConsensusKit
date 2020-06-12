@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Tcgv.ConsensusKit.Control
 {
@@ -28,7 +29,7 @@ namespace Tcgv.ConsensusKit.Control
                 var active = new List<EventBinding<TValue>>(bindings[key].Count);
                 foreach (var b in bindings[key])
                 {
-                    b.Action(value);
+                    ThreadPool.QueueUserWorkItem((x) => b.Action(value));
                     if (b.Recurrency == EventRecurrency.Multiple)
                         active.Add(b);
                 }
