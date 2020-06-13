@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
 
-namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
+namespace Tcgv.ConsensusKit.Algorithms.Paxos
 {
-    public class CTInstance : Instance
+    public class PxInstance : Instance
     {
-        public CTInstance(
+        public PxInstance(
             HashSet<Process> proposers,
             HashSet<Process> deciders,
             MessageBuffer buffer)
@@ -21,18 +20,12 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
             if (x != null)
             {
                 var mCount = msgs.Count;
-                var dCount = Deciders.Count;
-                var majority = 1 + ((Proposers.Count + dCount) / 2);
+                var majority = 1 + (Deciders.Count / 2);
 
                 switch (x.Type)
                 {
-                    case MessageType.Propose:
                     case MessageType.Ack:
-                    case MessageType.Nack:
                         return mCount >= majority;
-                    case MessageType.Select:
-                    case MessageType.Decide:
-                        return mCount >= dCount;
                 }
             }
             return false;

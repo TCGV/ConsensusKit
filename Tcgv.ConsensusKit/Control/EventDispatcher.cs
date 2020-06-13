@@ -12,38 +12,43 @@ namespace Tcgv.ConsensusKit.Control
             bindings = new Dictionary<TKey, List<EventBinding<TValue>>>();
         }
 
-        public void Attach(TKey key, Action<TValue> action)
+        public void Attach(TKey key, Func<TValue, TValue> filter, Action<TValue> action)
         {
-            Attch(key, action, EventRecurrency.Multiple);
+            Attch(key, filter, action, EventRecurrency.Multiple);
         }
 
-        public void AttachSingle(TKey key, Action<TValue> action)
+        public void AttachSingle(TKey key, Func<TValue, TValue> filter, Action<TValue> action)
         {
-            Attch(key, action, EventRecurrency.Single);
+            Attch(key, filter, action, EventRecurrency.Single);
         }
 
         public void Trigger(TKey key, TValue value)
         {
             lock (sync)
             {
-                var active = new List<EventBinding<TValue>>(bindings[key].Count);
-                foreach (var b in bindings[key])
+                if (bindings.ContainsKey(key))
                 {
-                    ThreadPool.QueueUserWorkItem((x) => b.Action(value));
-                    if (b.Recurrency == EventRecurrency.Multiple)
-                        active.Add(b);
+                    var active = new List<EventBinding<TValue>>(bindings[key].Count);
+                    foreach (var b in bindings[key])
+                    {
+                        var filtered = b.Filter(value);
+                        if (filtered != null)
+                            ThreadPool.QueueUserWorkItem((x) => b.Action(filtered));
+                        if (filtered == null || b.Recurrency == EventRecurrency.Multiple)
+                            active.Add(b);
+                    }
+                    bindings[key] = active;
                 }
-                bindings[key] = active;
             }
         }
 
-        private void Attch(TKey key, Action<TValue> action, EventRecurrency r)
+        private void Attch(TKey key, Func<TValue, TValue> filter, Action<TValue> action, EventRecurrency r)
         {
             lock (sync)
             {
                 if (!bindings.ContainsKey(key))
                     bindings.Add(key, new List<EventBinding<TValue>>());
-                bindings[key].Add(new EventBinding<TValue>(action, r));
+                bindings[key].Add(new EventBinding<TValue>(filter, action, r));
             }
         }
 

@@ -15,7 +15,8 @@ namespace Tcgv.ConsensusKit.Control
             Deciders = deciders;
             Value = null;
             this.buffer = buffer;
-            dispatcher = new EventDispatcher<MessageType, HashSet<Message>>();
+            quorumDispatcher = new EventDispatcher<MessageType, HashSet<Message>>();
+            msgDispatcher = new EventDispatcher<MessageType, Message>();
         }
 
         public HashSet<Process> Proposers { get; }
@@ -38,17 +39,36 @@ namespace Tcgv.ConsensusKit.Control
             Value = GetAgreedValue(all);
         }
 
-        public void Broadcast(Message msg)
+        public void Send(Message msg)
         {
             buffer.Add(this, msg);
+            msgDispatcher.Trigger(msg.Type, msg);
+
             var msgs = buffer.Filter(msg.Type, this);
-            if (HasQuorum(msgs))
-                dispatcher.Trigger(msg.Type, msgs);
+            quorumDispatcher.Trigger(msg.Type, msgs);
         }
 
-        public void WaitQuorum(MessageType type, Action<HashSet<Message>> onQuorum)
+        public void WaitMessage(MessageType type, Process receiver, Action<Message> onMessage)
         {
-            dispatcher.AttachSingle(type, onQuorum);
+            msgDispatcher.Attach(type, x =>
+            {
+                if (ShouldReceive(receiver, x))
+                    return x;
+                return null;
+            }, onMessage);
+        }
+
+        public void WaitQuorum(MessageType type, Process receiver, Action<HashSet<Message>> onQuorum)
+        {
+            quorumDispatcher.AttachSingle(type, x =>
+            {
+                var y = new HashSet<Message>(
+                    x.Where(m => ShouldReceive(receiver, m))
+                );
+                if (HasQuorum(y))
+                    return y;
+                return null;
+            }, onQuorum);
         }
 
         private void WaitTermination(IEnumerable<Process> all, int millisecondsTimeout)
@@ -58,13 +78,20 @@ namespace Tcgv.ConsensusKit.Control
 
         private object GetAgreedValue(IEnumerable<Process> all)
         {
-            return all
+            var values = all
                 .Select(a => a.Archiver.Query(this))
-                .Distinct()
-                .SingleOrDefault();
+                .Distinct();
+
+            return values.SingleOrDefault();
         }
 
-        private EventDispatcher<MessageType, HashSet<Message>> dispatcher;
+        private bool ShouldReceive(Process receiver, Message msg)
+        {
+            return (msg.Destination == null && msg.Source != receiver) || msg.Destination == receiver;
+        }
+
+        private EventDispatcher<MessageType, HashSet<Message>> quorumDispatcher;
+        private EventDispatcher<MessageType, Message> msgDispatcher;
         private MessageBuffer buffer;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
@@ -43,16 +44,29 @@ namespace Tcgv.ConsensusKit.Actors
         protected virtual void Start(Instance r)
         {
             var v = Proposer.GetProposal();
+            Broadcast(r, MessageType.Propose, v);
+        }
 
-            var msg = new Message(this, MessageType.Propose, v);
-
-            r.Broadcast(msg);
+        protected void SendTo(Instance r, Process destination, MessageType mType, object v)
+        {
+            var msg = new Message(this, destination, mType, v);
+            r.Send(msg);
         }
 
         protected void Broadcast(Instance r, MessageType mType, object v)
         {
             var msg = new Message(this, mType, v);
-            r.Broadcast(msg);
+            r.Send(msg);
+        }
+
+        protected void WaitMessage(Instance r, MessageType mType, Action<Message> onMessage)
+        {
+            r.WaitMessage(mType, this, onMessage);
+        }
+
+        protected void WaitQuorum(Instance r, MessageType mType, Action<HashSet<Message>> onQuorum)
+        {
+            r.WaitQuorum(mType, this, onQuorum);
         }
 
         protected void Terminate(Instance r, object v)

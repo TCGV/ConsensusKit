@@ -22,18 +22,18 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 
         private void BindAsCoordinator(Instance r)
         {
-            r.WaitQuorum(MessageType.Propose, msgs =>
+            WaitQuorum(r, MessageType.Propose, msgs =>
             {
-                var v = PickValue(
+                var v = PickMostRecentValue(
                     msgs.Where(m => Archiver.CanCommit(m.Value))
                 );
 
                 Broadcast(r, MessageType.Select, v);
             });
 
-            r.WaitQuorum(MessageType.Ack, msgs =>
+            WaitQuorum(r, MessageType.Ack, msgs =>
             {
-                var v = PickValue(msgs);
+                var v = PickMostRecentValue(msgs);
                 Broadcast(r, MessageType.Decide, v);
                 Terminate(r, v);
             });
@@ -41,20 +41,20 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 
         private void BindAsProcess(Instance r)
         {
-            r.WaitQuorum(MessageType.Select, msgs =>
+            WaitQuorum(r, MessageType.Select, msgs =>
             {
                 var v = msgs.Single().Value;
                 Broadcast(r, MessageType.Ack, v);
             });
 
-            r.WaitQuorum(MessageType.Decide, msgs =>
+            WaitQuorum(r, MessageType.Decide, msgs =>
             {
                 var v = msgs.Single().Value;
                 Terminate(r, v);
             });
         }
 
-        private object PickValue(IEnumerable<Message> msgs)
+        private object PickMostRecentValue(IEnumerable<Message> msgs)
         {
             return msgs
                 .OrderByDescending(x => x.Timestamp)

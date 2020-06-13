@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Algorithms.Common;
@@ -18,28 +17,28 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
 
         public override void Bind(Instance r)
         {
-            r.WaitQuorum(MessageType.Propose, msgs =>
+            WaitQuorum(r, MessageType.Propose, msgs =>
             {
-                var t = PickValue(msgs);
+                var x = PickMostFrequentValue(msgs);
 
-                var v = t.Item2 > msgs.Count / 2 ? t.Item1 : null;
+                var v = x.Count > r.Proposers.Count / 2 ? x.Value : null;
 
                 Broadcast(r, MessageType.Select, v);
             });
 
-            r.WaitQuorum(MessageType.Select, msgs =>
+            WaitQuorum(r, MessageType.Select, msgs =>
             {
-                var t = PickValue(msgs.Where(m => m.Value != null));
+                var x = PickMostFrequentValue(msgs.Where(m => m.Value != null));
 
-                if (t.Item2 >= f + 1)
+                if (x.Count >= f + 1)
                 {
-                    Terminate(r, t.Item1);
+                    Terminate(r, x.Value);
                     Proposer.Reset();
                 }
                 else
                 {
-                    if (t.Item2 > 0)
-                        Proposer.Set(t.Item1);
+                    if (x.Count > 0)
+                        Proposer.Set(x.Value);
                     else
                         Proposer.Reset();
                     Terminate(r, null);
@@ -47,14 +46,15 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
             });
         }
 
-        private Tuple<object, int> PickValue(IEnumerable<Message> msgs)
+        private AggregatedValue PickMostFrequentValue(IEnumerable<Message> msgs)
         {
             var x = (from m in msgs
                      group m by m.Value into g
                      select new { g.Key, Count = g.Count() })
                      .OrderByDescending(g => g.Count)
                      .FirstOrDefault();
-            return new Tuple<object, int>(x?.Key, x?.Count ?? 0);
+
+            return new AggregatedValue(x?.Key, x?.Count ?? 0);
         }
 
         private int f;
