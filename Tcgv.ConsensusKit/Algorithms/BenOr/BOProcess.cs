@@ -9,8 +9,8 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
 {
     public class BOProcess : Process
     {
-        public BOProcess(int f)
-            : base(new Archiver(), new RandomBooleanProposer())
+        public BOProcess(Archiver archiver, Proposer proposer, int f)
+            : base(archiver, proposer)
         {
             this.f = f;
         }
@@ -19,7 +19,9 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
         {
             WaitQuorum(r, MessageType.Propose, msgs =>
             {
-                var x = PickMostFrequentValue(msgs);
+                var x = PickMostFrequentValue(
+                    msgs.Where(m => Archiver.CanCommit(m.Value))
+                );
 
                 var v = x.Count > r.Proposers.Count / 2 ? x.Value : null;
 

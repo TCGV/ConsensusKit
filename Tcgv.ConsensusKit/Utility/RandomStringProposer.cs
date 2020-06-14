@@ -1,7 +1,7 @@
 ﻿using System;
 using Tcgv.ConsensusKit.Actors;
 
-namespace Tcgv.ConsensusKit.Algorithms.Common
+namespace Tcgv.ConsensusKit.Algorithms.Utility
 {
     public class RandomStringProposer : Proposer
     {

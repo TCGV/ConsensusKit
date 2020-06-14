@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using Tcgv.ConsensusKit.Actors;
+using Tcgv.ConsensusKit.Algorithms.Utility;
 
 namespace Tcgv.ConsensusKit.Algorithms.BenOr.Tests
 {
@@ -12,7 +14,7 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr.Tests
         {
             var processes = new List<BOProcess>();
             for (int i = 0; i < 32; i++)
-                processes.Add(new BOProcess(f: 4));
+                processes.Add(new BOProcess(new Archiver(), new RandomBooleanProposer(), f: 4));
 
             var protocol = new BOProtocol(processes, f: 4);
 

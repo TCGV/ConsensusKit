@@ -8,9 +8,9 @@ namespace Tcgv.ConsensusKit.Actors
 {
     public abstract class Process
     {
-        public Process(Archiver archive, Proposer proposer)
+        public Process(Archiver archiver, Proposer proposer)
         {
-            Archiver = archive;
+            Archiver = archiver;
             Proposer = proposer;
             barriers = new Dictionary<Instance, ManualResetEvent>();
         }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using Tcgv.ConsensusKit.Algorithms.Utility;
 
 namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
 {
@@ -12,7 +13,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
         {
             var processes = new List<CTProcess>();
             for (int i = 0; i < 32; i++)
-                processes.Add(new CTProcess());
+                processes.Add(new CTProcess(new UniqueArchiver(), new RandomStringProposer()));
 
             var protocol = new CTProtocol(processes);
 

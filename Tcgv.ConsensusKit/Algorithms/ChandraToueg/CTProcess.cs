@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
-using Tcgv.ConsensusKit.Algorithms.Common;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
 
@@ -9,8 +8,8 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
 {
     public class CTProcess : Process
     {
-        public CTProcess()
-            : base(new UniqueArchiver(), new RandomStringProposer()) { }
+        public CTProcess(Archiver archiver, Proposer proposer)
+            : base(archiver, proposer) { }
 
         public override void Bind(Instance r)
         {

@@ -10,8 +10,8 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
 {
     public class PxProcess : Process
     {
-        public PxProcess()
-            : base(new Archiver(), new RandomStringProposer())
+        public PxProcess(Archiver archiver, Proposer proposer)
+            : base(archiver, proposer)
         {
             proposalNumber = -1;
             minNumber = 0;
@@ -48,13 +48,16 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
 
             WaitQuorum(r, MessageType.Ack, msgs =>
             {
-                var x = PickHighestNumberedValue(msgs);
+                var v = PickHighestNumberedValue(msgs)?.Value ?? Proposer.GetProposal();
 
-                accepted = new NumberedValue(x?.Value ?? Proposer.GetProposal(), proposalNumber);
+                if (Archiver.CanCommit(v))
+                {
+                    accepted = new NumberedValue(v, proposalNumber);
 
-                Broadcast(r, MessageType.Select, accepted);
+                    Broadcast(r, MessageType.Select, accepted);
 
-                Terminate(r, accepted.Value);
+                    Terminate(r, accepted.Value);
+                }
             });
 
             WaitMessage(r, MessageType.Nack, msg =>
