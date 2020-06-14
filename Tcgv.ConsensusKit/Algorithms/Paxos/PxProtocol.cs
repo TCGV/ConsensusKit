@@ -25,10 +25,11 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 var len = 3;
                 var proposers = Processes
                     .Skip(i % (Processes.Length - len)).Take(len);
+                var accepters = Processes.Except(proposers);
 
                 var r = new PxInstance(
                     new HashSet<Process>(proposers),
-                    new HashSet<Process>(Processes),
+                    new HashSet<Process>(accepters),
                     buffer
                 );
 

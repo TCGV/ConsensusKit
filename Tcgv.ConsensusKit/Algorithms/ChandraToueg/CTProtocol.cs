@@ -23,9 +23,10 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
             for (int i = 0; i < iterations; i++)
             {
                 var coordinator = Processes[i % Processes.Length];
+                var proposers = Processes.Except(new[] { coordinator });
 
                 var r = new CTInstance(
-                    new HashSet<Process>(Processes),
+                    new HashSet<Process>(proposers),
                     new HashSet<Process>(new[] { coordinator }),
                     buffer
                 );

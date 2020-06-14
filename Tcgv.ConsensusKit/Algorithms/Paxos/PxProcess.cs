@@ -31,21 +31,14 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
 
         public override void Bind(Instance r)
         {
-            WaitMessage(r, MessageType.Propose, msg =>
-            {
-                var n = (long)msg.Value;
+            if (r.Proposers.Contains(this))
+                BindAsProposer(r);
+            else
+                BindAsAccepter(r);
+        }
 
-                if (n > minNumber)
-                {
-                    minNumber = n;
-                    SendTo(r, msg.Source, MessageType.Ack, accepted);
-                }
-                else
-                {
-                    SendTo(r, msg.Source, MessageType.Nack, minNumber);
-                }
-            });
-
+        private void BindAsProposer(Instance r)
+        {
             WaitQuorum(r, MessageType.Ack, msgs =>
             {
                 var v = PickHighestNumberedValue(msgs)?.Value ?? Proposer.GetProposal();
@@ -53,11 +46,14 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 if (Archiver.CanCommit(v))
                 {
                     accepted = new NumberedValue(v, proposalNumber);
-
                     Broadcast(r, MessageType.Select, accepted);
-
-                    Terminate(r, accepted.Value);
                 }
+                else
+                {
+                    v = null;
+                }
+
+                Terminate(r, v);
             });
 
             WaitMessage(r, MessageType.Nack, msg =>
@@ -66,6 +62,26 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 {
                     var n = (long)msg.Value;
                     minNumber = Math.Max(n, minNumber);
+                }
+
+                Terminate(r, null);
+            });
+        }
+
+        private void BindAsAccepter(Instance r)
+        {
+            WaitMessage(r, MessageType.Propose, msg =>
+            {
+                var n = (long)msg.Value;
+
+                if (n > minNumber)
+                {
+                    minNumber = n;
+                    SendTo(msg.Source, r, MessageType.Ack, accepted);
+                }
+                else
+                {
+                    SendTo(msg.Source, r, MessageType.Nack, minNumber);
                 }
             });
 
@@ -76,7 +92,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 if (x.Number >= minNumber)
                 {
                     accepted = x;
-                    Terminate(r, accepted.Value);
+                    Terminate(r, accepted?.Value);
                 }
             });
         }

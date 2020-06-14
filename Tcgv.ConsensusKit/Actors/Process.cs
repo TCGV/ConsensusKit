@@ -43,13 +43,16 @@ namespace Tcgv.ConsensusKit.Actors
 
         protected virtual void Start(Instance r)
         {
-            var v = Proposer.GetProposal();
-            Broadcast(r, MessageType.Propose, v);
+            if (r.Proposers.Contains(this))
+            {
+                var v = Proposer.GetProposal();
+                Broadcast(r, MessageType.Propose, v);
+            }
         }
 
-        protected void SendTo(Instance r, Process destination, MessageType mType, object v)
+        protected void SendTo(Process dest, Instance r, MessageType mType, object v)
         {
-            var msg = new Message(this, destination, mType, v);
+            var msg = new Message(this, dest, mType, v);
             r.Send(msg);
         }
 

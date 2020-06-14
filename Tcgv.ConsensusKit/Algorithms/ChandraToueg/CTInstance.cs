@@ -22,7 +22,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
             {
                 var mCount = msgs.Count;
                 var dCount = Deciders.Count;
-                var majority = 1 + ((Proposers.Count + dCount) / 2);
+                var majority = 1 + (Proposers.Count / 2);
 
                 switch (x.Type)
                 {

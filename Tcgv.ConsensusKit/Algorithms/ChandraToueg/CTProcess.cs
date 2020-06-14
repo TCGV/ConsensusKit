@@ -16,7 +16,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
             if (r.Deciders.Contains(this))
                 BindAsCoordinator(r);
             else
-                BindAsProcess(r);
+                BindAsProposer(r);
         }
 
         private void BindAsCoordinator(Instance r)
@@ -38,7 +38,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
             });
         }
 
-        private void BindAsProcess(Instance r)
+        private void BindAsProposer(Instance r)
         {
             WaitQuorum(r, MessageType.Select, msgs =>
             {
