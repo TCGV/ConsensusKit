@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
-using Tcgv.ConsensusKit.Algorithms.Common;
+using Tcgv.ConsensusKit.Algorithms.BenOr.Data;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
 

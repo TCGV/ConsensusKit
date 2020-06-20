@@ -1,4 +1,4 @@
-﻿namespace Tcgv.ConsensusKit.Algorithms.Common
+﻿namespace Tcgv.ConsensusKit.Algorithms.BenOr.Data
 {
     public class AggregatedValue
     {

@@ -18,6 +18,7 @@ In this repository you can find implementations for the following algorithms:
 * [Chandra–Toueg](https://github.com/TCGV/ConsensusKit/tree/master/Tcgv.ConsensusKit/Algorithms/ChandraToueg)
 * [Ben-Or](https://github.com/TCGV/ConsensusKit/tree/master/Tcgv.ConsensusKit/Algorithms/BenOr)
 * [Basic Paxos](https://github.com/TCGV/ConsensusKit/tree/master/Tcgv.ConsensusKit/Algorithms/Paxos)
+* [Nakamoto Consensus](https://github.com/TCGV/ConsensusKit/tree/master/Tcgv.ConsensusKit/Algorithms/Nakamoto)
 
 ## Sources
 
@@ -28,6 +29,8 @@ In this repository you can find implementations for the following algorithms:
 [3] Leslie Lamport. [Paxos Made Simple](https://lamport.azurewebsites.net/pubs/paxos-simple.pdf). 2001.
 
 [4] James Aspnes. [Paxos - Class notes](https://www.cs.yale.edu/homes/aspnes/pinewiki/Paxos.html). 2003 to 2012.
+
+[5] Jianyu Niu, Chen Feng, Hoang Dau, Yu-Chih Huang, and Jingge Zhu. [Analysis of Nakamoto Consensus, Revisited](https://arxiv.org/abs/1910.08510). 2019.
 
 ## Licensing
 

@@ -80,6 +80,7 @@ namespace Tcgv.ConsensusKit.Control
         {
             var values = all
                 .Select(a => a.Archiver.Query(this))
+                .Where(v => v != null)
                 .Distinct();
 
             return values.SingleOrDefault();
