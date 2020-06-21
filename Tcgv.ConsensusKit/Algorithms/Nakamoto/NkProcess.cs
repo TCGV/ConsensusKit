@@ -5,7 +5,6 @@ using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Algorithms.Nakamoto.Data;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
-using Tcgv.ConsensusKit.Security;
 
 namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
 {
@@ -23,9 +22,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
 
         protected override void Start(Instance r)
         {
-            new Thread(() =>
+            if (r.Proposers.Contains(this))
             {
-                if (Archiver.CanCommit(Proposer.GetProposal()))
+                new Thread(() =>
                 {
                     var b = MineBlock(r);
                     if (b != null)
@@ -33,8 +32,8 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
                         ProcessBlock(r, b);
                         Broadcast(r, MessageType.Propose, b);
                     }
-                }
-            }).Start();
+                }).Start();
+            }
         }
 
         public override void Bind(Instance r)
@@ -48,15 +47,21 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
 
         private void ProcessBlock(Instance r, Block b)
         {
-            if (VerifyPoW(b))
+            if (b.VerifyPoW())
             {
                 var newChain = AddNewChain(b);
-                if (newChain != null && b.Height - k0 == k && !IsTerminated(r))
+                if (IsKDeep(newChain) && !IsTerminated(r))
                 {
                     Terminate(r, GetBlockAt(newChain, k).Value);
                     CommitChain(newChain);
                 }
             }
+        }
+
+        private bool IsKDeep(LinkedList<Block> chain)
+        {
+            var b = chain?.First?.Value;
+            return b != null && b.Height - k0 == k;
         }
 
         private Block MineBlock(Instance r)
@@ -65,7 +70,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
             var found = false;
             var v = Proposer.GetProposal();
             var c = counter;
-            while (!IsTerminated(r) && !found)
+            while (!IsTerminated(r) && Archiver.CanCommit(v) && !found)
             {
                 if (b == null || counter > c)
                 {
@@ -76,17 +81,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
                     b = new Block(v, h);
                 }
                 b.IncrementPoW();
-                found = VerifyPoW(b);
+                found = b.VerifyPoW();
             }
             return found ? b : null;
-        }
-
-        private static bool VerifyPoW(Block b, int leadingZeros = 2)
-        {
-            var bytes = SHA256.Hash($"{b.Id}{b.PoW}");
-            int i = 0;
-            for (; i < leadingZeros && bytes[i] == 0; i++) ;
-            return i == leadingZeros;
         }
 
         private Block GetHeadFromLongestChain(object v)
@@ -123,17 +120,17 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
             }
         }
 
-        private LinkedList<Block> AddNewChain(Block header)
+        private LinkedList<Block> AddNewChain(Block head)
         {
             lock (sync)
             {
                 LinkedList<Block> newChain = null;
-                if (blockchains.ContainsKey(header.PreviousId))
+                if (blockchains.ContainsKey(head.PreviousId))
                 {
-                    var oldChain = blockchains[header.PreviousId];
+                    var oldChain = blockchains[head.PreviousId];
                     newChain = new LinkedList<Block>(oldChain);
-                    newChain.AddFirst(header);
-                    blockchains.Add(header.Id, newChain);
+                    newChain.AddFirst(head);
+                    blockchains.Add(head.Id, newChain);
                     counter++;
                 }
                 return newChain;

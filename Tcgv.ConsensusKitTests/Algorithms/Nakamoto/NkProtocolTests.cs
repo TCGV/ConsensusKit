@@ -20,7 +20,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto.Tests
             var instances = protocol.Execute(10, -1);
 
             Assert.AreEqual(10, instances.Length);
-            Assert.IsTrue(instances.Any(r => r.Value != null));
+            Assert.IsTrue(instances.All(r => r.Consensus));
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
             var instances = protocol.Execute(10, -1);
 
             Assert.AreEqual(10, instances.Length);
-            Assert.IsTrue(instances.All(r => r.Value != null));
+            Assert.IsTrue(instances.All(r => r.Consensus));
         }
     }
 }

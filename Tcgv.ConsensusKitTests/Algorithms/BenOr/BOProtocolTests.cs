@@ -21,8 +21,8 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr.Tests
             var instances = protocol.Execute(100, -1);
 
             Assert.AreEqual(100, instances.Length);
-            Assert.IsTrue(instances.Any(r => r.Value == null));
-            Assert.IsTrue(instances.Any(r => r.Value != null));
+            Assert.IsTrue(instances.Any(r => r.Consensus));
+            Assert.IsTrue(instances.Any(r => !r.Consensus));
         }
     }
 }

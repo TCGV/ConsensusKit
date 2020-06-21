@@ -21,9 +21,15 @@ namespace Tcgv.ConsensusKit.Control
 
         public HashSet<Process> Proposers { get; }
         public HashSet<Process> Deciders { get; }
+        public bool Consensus { get; private set; }
         public object Value { get; private set; }
 
         public abstract bool HasQuorum(HashSet<Message> msgs);
+
+        public virtual bool IsMajority(int n)
+        {
+            return n >= (1 + Proposers.Union(Deciders).Count() / 2);
+        }
 
         public void Execute(int millisecondsTimeout)
         {
@@ -36,7 +42,11 @@ namespace Tcgv.ConsensusKit.Control
 
             WaitTermination(all, millisecondsTimeout);
 
-            Value = GetAgreedValue(all);
+            if (ConsensusReached(all))
+            {
+                Consensus = true;
+                Value = GetAgreedValue(all);
+            }
         }
 
         public void Send(Message msg)
@@ -76,14 +86,22 @@ namespace Tcgv.ConsensusKit.Control
             all.All(p => p.Join(this, millisecondsTimeout));
         }
 
-        private object GetAgreedValue(IEnumerable<Process> all)
+        private bool ConsensusReached(IEnumerable<Process> all)
         {
             var values = all
                 .Select(a => a.Archiver.Query(this))
-                .Where(v => v != null)
-                .Distinct();
+                .Where(x => x != null);
+            var v = values.Distinct().SingleOrDefault();
+            return IsMajority(values.Count(x => x == v));
+        }
 
-            return values.SingleOrDefault();
+        private object GetAgreedValue(IEnumerable<Process> all)
+        {
+            return all
+                .Select(a => a.Archiver.Query(this))
+                .Where(x => x != null)
+                .Distinct()
+                .SingleOrDefault();
         }
 
         private bool ShouldReceive(Process receiver, Message msg)
