@@ -36,6 +36,11 @@ namespace Tcgv.ConsensusKit.Actors
             }
         }
 
+        public bool IsTerminated(Instance r)
+        {
+            return Archiver.IsCommited(r);
+        }
+
         public bool Join(Instance r, int millisecondsTimeout)
         {
             bool b = true;
@@ -84,11 +89,6 @@ namespace Tcgv.ConsensusKit.Actors
                 if (barriers.ContainsKey(r))
                     barriers[r].Set();
             }
-        }
-
-        protected bool IsTerminated(Instance r)
-        {
-            return Archiver.IsCommited(r);
         }
 
         private Dictionary<Instance, ManualResetEvent> barriers;

@@ -105,7 +105,8 @@ namespace Tcgv.ConsensusKit.Control
 
         private bool ShouldReceive(Process receiver, Message msg)
         {
-            return (msg.Destination == null && msg.Source != receiver) || msg.Destination == receiver;
+            return !receiver.IsTerminated(this) &&
+                (msg.Destination == null && msg.Source != receiver) || msg.Destination == receiver;
         }
 
         private EventDispatcher<MessageType, HashSet<Message>> quorumDispatcher;
