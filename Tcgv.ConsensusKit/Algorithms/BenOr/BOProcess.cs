@@ -43,7 +43,6 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
                         Proposer.Set(x.Value);
                     else
                         Proposer.Reset();
-                    Terminate(r, null);
                 }
             });
         }

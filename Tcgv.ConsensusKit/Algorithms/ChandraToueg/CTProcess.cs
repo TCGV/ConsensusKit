@@ -56,7 +56,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
         private object PickMostRecentValue(IEnumerable<Message> msgs)
         {
             return msgs
-                .OrderByDescending(x => x.Timestamp)
+                .OrderByDescending(x => x.Sequence)
                 .FirstOrDefault()?.Value;
         }
     }

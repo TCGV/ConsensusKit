@@ -19,12 +19,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
 
         protected override void Start(Instance r)
         {
-            accepted = null;
-
             if (r.Proposers.Contains(this))
             {
                 proposalNumber = minNumber + 1;
-
                 Broadcast(r, MessageType.Propose, proposalNumber);
             }
         }
@@ -45,15 +42,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
 
                 if (Archiver.CanCommit(v))
                 {
-                    accepted = new NumberedValue(v, proposalNumber);
-                    Broadcast(r, MessageType.Select, accepted);
+                    var x = new NumberedValue(v, proposalNumber);
+                    Broadcast(r, MessageType.Select, x);
                 }
-                else
-                {
-                    v = null;
-                }
-
-                Terminate(r, v);
             });
 
             WaitMessage(r, MessageType.Nack, msg =>
@@ -63,8 +54,18 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                     var n = (long)msg.Value;
                     minNumber = Math.Max(n, minNumber);
                 }
+            });
 
-                Terminate(r, null);
+            WaitQuorum(r, MessageType.Accept, msgs =>
+            {
+                var m = msgs.Select(m => m.Value).Distinct();
+
+                if (m.Count() == 1)
+                {
+                    var x = m.Single() as NumberedValue;
+                    Terminate(r, x.Value);
+                    Broadcast(r, MessageType.Decide, x);
+                }
             });
         }
 
@@ -92,7 +93,18 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 if (x.Number >= minNumber)
                 {
                     accepted = x;
-                    Terminate(r, accepted?.Value);
+                    SendTo(msg.Source, r, MessageType.Accept, x);
+                }
+            });
+
+            WaitMessage(r, MessageType.Decide, msg =>
+            {
+                var x = msg.Value as NumberedValue;
+
+                if (x == accepted)
+                {
+                    accepted = null;
+                    Terminate(r, x.Value);
                 }
             });
         }

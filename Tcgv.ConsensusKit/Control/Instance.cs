@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Exchange;
 
@@ -38,9 +37,9 @@ namespace Tcgv.ConsensusKit.Control
             foreach (var p in all)
                 p.Bind(this);
 
-            Parallel.ForEach(all, p => p.Execute(this));
+            ThreadManager.ForEach(all, p => p.Execute(this));
 
-            WaitTermination(all, millisecondsTimeout);
+            ThreadManager.Join(millisecondsTimeout);
 
             if (ConsensusReached(all))
             {
@@ -81,9 +80,9 @@ namespace Tcgv.ConsensusKit.Control
             }, onQuorum);
         }
 
-        private void WaitTermination(IEnumerable<Process> all, int millisecondsTimeout)
+        public Message[] QueryMessages()
         {
-            all.All(p => p.Join(this, millisecondsTimeout));
+            return buffer.Query(this).ToArray();
         }
 
         private bool ConsensusReached(IEnumerable<Process> all)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Algorithms.Nakamoto.Data;
 using Tcgv.ConsensusKit.Control;
@@ -24,7 +23,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
         {
             if (r.Proposers.Contains(this))
             {
-                new Thread(() =>
+                ThreadManager.Start(() =>
                 {
                     var b = MineBlock(r);
                     if (b != null)
@@ -32,7 +31,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
                         ProcessBlock(r, b);
                         Broadcast(r, MessageType.Propose, b);
                     }
-                }).Start();
+                });
             }
         }
 

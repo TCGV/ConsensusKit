@@ -30,7 +30,7 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
                 {
                     case MessageType.Propose:
                     case MessageType.Select:
-                        return mCount >= pCount - f;
+                        return mCount >= pCount - f - 1;
                 }
             }
             return false;

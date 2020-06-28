@@ -28,6 +28,11 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto.Data
             }
         }
 
+        public override string ToString()
+        {
+            return $"(v = {Value}, h = {Height})";
+        }
+
         internal void IncrementPoW()
         {
             PoW++;

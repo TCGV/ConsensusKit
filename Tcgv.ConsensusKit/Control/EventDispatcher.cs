@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Tcgv.ConsensusKit.Control
 {
@@ -33,7 +32,7 @@ namespace Tcgv.ConsensusKit.Control
                     {
                         var filtered = b.Filter(value);
                         if (filtered != null)
-                            ThreadPool.QueueUserWorkItem((x) => b.Action(filtered));
+                            Trigger(b, filtered);
                         if (filtered == null || b.Recurrency == EventRecurrency.Multiple)
                             active.Add(b);
                     }
@@ -50,6 +49,11 @@ namespace Tcgv.ConsensusKit.Control
                     bindings.Add(key, new List<EventBinding<TValue>>());
                 bindings[key].Add(new EventBinding<TValue>(filter, action, r));
             }
+        }
+
+        private void Trigger(EventBinding<TValue> binding, TValue arg)
+        {
+            ThreadManager.Enqueue(() => binding.Action(arg));
         }
 
         private Dictionary<TKey, List<EventBinding<TValue>>> bindings;

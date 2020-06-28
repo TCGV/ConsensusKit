@@ -21,12 +21,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
             {
                 var mCount = msgs.Count;
                 var majority = 1 + (Deciders.Count / 2);
-
-                switch (x.Type)
-                {
-                    case MessageType.Ack:
-                        return mCount >= majority;
-                }
+                return mCount >= majority;
             }
             return false;
         }

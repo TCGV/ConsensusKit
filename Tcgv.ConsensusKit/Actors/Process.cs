@@ -10,10 +10,13 @@ namespace Tcgv.ConsensusKit.Actors
     {
         public Process(Archiver archiver, Proposer proposer)
         {
+            Id = Interlocked.Increment(ref sequence);
             Archiver = archiver;
             Proposer = proposer;
             barriers = new Dictionary<Instance, ManualResetEvent>();
         }
+
+        public int Id { get; }
 
         public Archiver Archiver { get; }
 
@@ -46,7 +49,8 @@ namespace Tcgv.ConsensusKit.Actors
             if (r.Proposers.Contains(this))
             {
                 var v = Proposer.GetProposal();
-                Broadcast(r, MessageType.Propose, v);
+                if (Archiver.CanCommit(v))
+                    Broadcast(r, MessageType.Propose, v);
             }
         }
 
@@ -88,5 +92,6 @@ namespace Tcgv.ConsensusKit.Actors
         }
 
         private Dictionary<Instance, ManualResetEvent> barriers;
+        private static int sequence;
     }
 }

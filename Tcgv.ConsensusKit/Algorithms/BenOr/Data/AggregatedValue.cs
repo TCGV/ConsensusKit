@@ -10,5 +10,10 @@
 
         public object Value { get; }
         public int Count { get; }
+
+        public override string ToString()
+        {
+            return $"(v = {Value}, c = {Count})";
+        }
     }
 }

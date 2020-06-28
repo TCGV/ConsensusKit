@@ -4,8 +4,9 @@
     {
         Propose,
         Select,
+        Accept,
+        Decide,
         Ack,
         Nack,
-        Decide
     }
 }

@@ -46,7 +46,7 @@ namespace Tcgv.ConsensusKit.Actors
         {
             lock (sync)
             {
-                return commited[r];
+                return commited.ContainsKey(r) ? commited[r] : null;
             }
         }
 

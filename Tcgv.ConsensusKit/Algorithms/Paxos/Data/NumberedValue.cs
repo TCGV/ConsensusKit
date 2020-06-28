@@ -10,5 +10,10 @@
 
         public object Value { get; }
         public long Number { get; }
+
+        public override string ToString()
+        {
+            return $"(v = {Value}, n = {Number})";
+        }
     }
 }
