@@ -11,8 +11,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
         public PxInstance(
             HashSet<Process> proposers,
             HashSet<Process> deciders,
-            MessageBuffer buffer)
-            : base(proposers, deciders, buffer) { }
+            MessageBuffer buffer,
+            int randomDispatchDelay)
+            : base(proposers, deciders, buffer, randomDispatchDelay) { }
 
         public override bool HasQuorum(HashSet<Message> msgs)
         {

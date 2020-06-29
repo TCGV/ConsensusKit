@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using Tcgv.ConsensusKit.Utility;
 
 namespace Tcgv.ConsensusKit.Control
 {
     public class EventDispatcher<TKey, TValue>
     {
-        public EventDispatcher()
+        public EventDispatcher(int randomDispatchDelay)
         {
             sync = new object();
+            this.randomDispatchDelay = randomDispatchDelay;
             bindings = new Dictionary<TKey, List<EventBinding<TValue>>>();
         }
 
@@ -53,9 +55,15 @@ namespace Tcgv.ConsensusKit.Control
 
         private void Trigger(EventBinding<TValue> binding, TValue arg)
         {
-            ThreadManager.Enqueue(() => binding.Action(arg));
+            ThreadManager.Enqueue(() =>
+            {
+                if (randomDispatchDelay > 0)
+                    RandomExtensions.Sleep(randomDispatchDelay);
+                binding.Action(arg);
+            });
         }
 
+        private int randomDispatchDelay;
         private Dictionary<TKey, List<EventBinding<TValue>>> bindings;
         private object sync;
     }

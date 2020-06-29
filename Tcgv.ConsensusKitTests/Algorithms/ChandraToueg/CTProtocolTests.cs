@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Algorithms.Utility;
 using Tcgv.ConsensusKit.Formatting;
 
@@ -26,7 +25,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
         {
             var protocol = CreateProtocol(10);
 
-            var instances = protocol.Execute(5, -1);
+            var instances = protocol.Execute(5, -1, 100);
 
             var str = new Analyzer().PrintHistory(instances);
         }
@@ -37,7 +36,7 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg.Tests
 
             for (int i = 0; i < processesCount; i++)
             {
-                var p = new CTProcess(new Archiver(), new RandomBooleanProposer());
+                var p = new CTProcess(new UniqueArchiver(), new RandomStringProposer());
                 processes.Add(p);
             }
 

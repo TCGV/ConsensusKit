@@ -10,6 +10,7 @@ namespace Tcgv.ConsensusKit.Actors
     {
         public Process(Archiver archiver, Proposer proposer)
         {
+            sync = new object();
             Id = Interlocked.Increment(ref sequence);
             Archiver = archiver;
             Proposer = proposer;
@@ -73,12 +74,12 @@ namespace Tcgv.ConsensusKit.Actors
 
         protected void WaitMessage(Instance r, MessageType mType, Action<Message> onMessage)
         {
-            r.WaitMessage(mType, this, onMessage);
+            r.WaitMessage(mType, this, Sync(onMessage));
         }
 
         protected void WaitQuorum(Instance r, MessageType mType, Action<HashSet<Message>> onQuorum)
         {
-            r.WaitQuorum(mType, this, onQuorum);
+            r.WaitQuorum(mType, this, Sync(onQuorum));
         }
 
         protected void Terminate(Instance r, object v)
@@ -91,7 +92,19 @@ namespace Tcgv.ConsensusKit.Actors
             }
         }
 
+        private Action<T> Sync<T>(Action<T> action)
+        {
+            return (x) =>
+            {
+                lock (sync)
+                {
+                    action(x);
+                }
+            };
+        }
+
         private Dictionary<Instance, ManualResetEvent> barriers;
+        private object sync;
         private static int sequence;
     }
 }

@@ -23,9 +23,9 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos.Tests
         [TestMethod()]
         public void PrintHistoryTest()
         {
-            var protocol = CreateProtocol(10);
+            var protocol = CreateProtocol(32);
 
-            var instances = protocol.Execute(5, -1);
+            var instances = protocol.Execute(5, -1, 100);
 
             var str = new Analyzer().PrintHistory(instances);
         }

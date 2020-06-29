@@ -17,7 +17,10 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
         public BOProtocol(IEnumerable<BOProcess> processes, int f)
             : this(processes.ToArray(), f) { }
 
-        public override Instance[] Execute(int iterations, int millisecondsTimeout)
+        public override Instance[] Execute(
+            int iterations,
+            int millisecondsTimeout,
+            int randomDispatchDelay = 0)
         {
             var instances = new Instance[iterations];
 
@@ -29,6 +32,7 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
                     new HashSet<Process>(Processes),
                     new HashSet<Process>(),
                     buffer,
+                    randomDispatchDelay,
                     f: f
                 );
 

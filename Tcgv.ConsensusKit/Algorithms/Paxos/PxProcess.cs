@@ -5,6 +5,7 @@ using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Algorithms.Paxos.Data;
 using Tcgv.ConsensusKit.Control;
 using Tcgv.ConsensusKit.Exchange;
+using Tcgv.ConsensusKit.Utility;
 
 namespace Tcgv.ConsensusKit.Algorithms.Paxos
 {
@@ -52,7 +53,12 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 if (msg.Value != null)
                 {
                     var n = (long)msg.Value;
-                    minNumber = Math.Max(n, minNumber);
+                    if (n > minNumber)
+                    {
+                        minNumber = Math.Max(n, minNumber);
+                        if (RandomExtensions.Tryout(0.5))
+                            Start(r);
+                    }
                 }
             });
 
@@ -63,7 +69,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 if (m.Count() == 1)
                 {
                     var x = m.Single() as NumberedValue;
-                    Terminate(r, x.Value);
+                    Terminate(r, x);
                     Broadcast(r, MessageType.Decide, x);
                 }
             });
@@ -90,7 +96,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
             {
                 var x = msg.Value as NumberedValue;
 
-                if (x.Number >= minNumber)
+                if (x.Number >= minNumber && Archiver.CanCommit(x.Value))
                 {
                     accepted = x;
                     SendTo(msg.Source, r, MessageType.Accept, x);
@@ -100,13 +106,15 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
             WaitMessage(r, MessageType.Decide, msg =>
             {
                 var x = msg.Value as NumberedValue;
-
-                if (x == accepted)
-                {
-                    accepted = null;
-                    Terminate(r, x.Value);
-                }
+                Terminate(r, x);
             });
+        }
+
+        private void Terminate(Instance r, NumberedValue x)
+        {
+            if (x.Value == accepted?.Value)
+                accepted = null;
+            Terminate(r, x.Value);
         }
 
         private NumberedValue PickHighestNumberedValue(IEnumerable<Message> msgs)

@@ -14,7 +14,10 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
         public CTProtocol(IEnumerable<CTProcess> processes)
             : base(processes.ToArray()) { }
 
-        public override Instance[] Execute(int iterations, int millisecondsTimeout)
+        public override Instance[] Execute(
+            int iterations,
+            int millisecondsTimeout,
+            int randomDispatchDelay = 0)
         {
             var instances = new Instance[iterations];
 
@@ -28,7 +31,8 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
                 var r = new CTInstance(
                     new HashSet<Process>(proposers),
                     new HashSet<Process>(new[] { coordinator }),
-                    buffer
+                    buffer,
+                    randomDispatchDelay
                 );
 
                 r.Execute(millisecondsTimeout);

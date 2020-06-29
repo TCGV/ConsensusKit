@@ -8,14 +8,18 @@ namespace Tcgv.ConsensusKit.Control
 {
     public abstract class Instance
     {
-        public Instance(HashSet<Process> proposers, HashSet<Process> deciders, MessageBuffer buffer)
+        public Instance(
+            HashSet<Process> proposers,
+            HashSet<Process> deciders,
+            MessageBuffer buffer,
+            int randomDispatchDelay)
         {
             Proposers = proposers;
             Deciders = deciders;
             Value = null;
             this.buffer = buffer;
-            quorumDispatcher = new EventDispatcher<MessageType, HashSet<Message>>();
-            msgDispatcher = new EventDispatcher<MessageType, Message>();
+            quorumDispatcher = new EventDispatcher<MessageType, HashSet<Message>>(randomDispatchDelay);
+            msgDispatcher = new EventDispatcher<MessageType, Message>(randomDispatchDelay);
         }
 
         public HashSet<Process> Proposers { get; }

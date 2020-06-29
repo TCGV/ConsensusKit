@@ -12,8 +12,9 @@ namespace Tcgv.ConsensusKit.Algorithms.BenOr
             HashSet<Process> proposers,
             HashSet<Process> deciders,
             MessageBuffer buffer,
+            int randomDispatchDelay,
             int f)
-            : base(proposers, deciders, buffer)
+            : base(proposers, deciders, buffer, randomDispatchDelay)
         {
             this.f = f;
         }

@@ -14,7 +14,10 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
         public PxProtocol(IEnumerable<PxProcess> processes)
             : base(processes.ToArray()) { }
 
-        public override Instance[] Execute(int iterations, int millisecondsTimeout)
+        public override Instance[] Execute(
+            int iterations,
+            int millisecondsTimeout,
+            int randomDispatchDelay = 0)
         {
             var instances = new Instance[iterations];
 
@@ -30,7 +33,8 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                 var r = new PxInstance(
                     new HashSet<Process>(proposers),
                     new HashSet<Process>(accepters),
-                    buffer
+                    buffer,
+                    randomDispatchDelay
                 );
 
                 r.Execute(millisecondsTimeout);

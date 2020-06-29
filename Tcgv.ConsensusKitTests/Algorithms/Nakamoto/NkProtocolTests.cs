@@ -25,7 +25,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto.Tests
         {
             var protocol = CreateProtocol(10, 5);
 
-            var instances = protocol.Execute(5, -1);
+            var instances = protocol.Execute(5, -1, 100);
 
             var str = new Analyzer().PrintHistory(instances);
         }

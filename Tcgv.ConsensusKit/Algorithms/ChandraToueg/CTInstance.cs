@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Tcgv.ConsensusKit.Actors;
 using Tcgv.ConsensusKit.Control;
@@ -12,8 +11,9 @@ namespace Tcgv.ConsensusKit.Algorithms.ChandraToueg
         public CTInstance(
             HashSet<Process> proposers,
             HashSet<Process> deciders,
-            MessageBuffer buffer)
-            : base(proposers, deciders, buffer) { }
+            MessageBuffer buffer,
+            int randomDispatchDelay)
+            : base(proposers, deciders, buffer, randomDispatchDelay) { }
 
         public override bool HasQuorum(HashSet<Message> msgs)
         {
