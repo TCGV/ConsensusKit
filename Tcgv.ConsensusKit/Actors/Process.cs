@@ -32,7 +32,8 @@ namespace Tcgv.ConsensusKit.Actors
                 if (!IsTerminated(r))
                 {
                     barriers.Add(r, new ManualResetEvent(false));
-                    Start(r);
+                    if (r.Proposers.Contains(this))
+                        Propose(r);
                 }
             }
         }
@@ -50,14 +51,11 @@ namespace Tcgv.ConsensusKit.Actors
             return b;
         }
 
-        protected virtual void Start(Instance r)
+        protected virtual void Propose(Instance r)
         {
-            if (r.Proposers.Contains(this))
-            {
-                var v = Proposer.GetProposal();
-                if (Archiver.CanCommit(v))
-                    Broadcast(r, MessageType.Propose, v);
-            }
+            var v = Proposer.GetProposal();
+            if (Archiver.CanCommit(v))
+                Broadcast(r, MessageType.Propose, v);
         }
 
         protected void SendTo(Process dest, Instance r, MessageType mType, object v)

@@ -18,13 +18,10 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
             minNumber = 0;
         }
 
-        protected override void Start(Instance r)
+        protected override void Propose(Instance r)
         {
-            if (r.Proposers.Contains(this))
-            {
-                proposalNumber = minNumber + 1;
-                Broadcast(r, MessageType.Propose, proposalNumber);
-            }
+            proposalNumber = minNumber + 1;
+            Broadcast(r, MessageType.Propose, proposalNumber);
         }
 
         public override void Bind(Instance r)
@@ -57,7 +54,7 @@ namespace Tcgv.ConsensusKit.Algorithms.Paxos
                     {
                         minNumber = Math.Max(n, minNumber);
                         if (RandomExtensions.Tryout(0.5))
-                            Start(r);
+                            Propose(r);
                     }
                 }
             });

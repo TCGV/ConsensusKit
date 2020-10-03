@@ -19,20 +19,17 @@ namespace Tcgv.ConsensusKit.Algorithms.Nakamoto
             AddGenesisChain();
         }
 
-        protected override void Start(Instance r)
+        protected override void Propose(Instance r)
         {
-            if (r.Proposers.Contains(this))
+            ThreadManager.Start(() =>
             {
-                ThreadManager.Start(() =>
+                var b = MineBlock(r);
+                if (b != null)
                 {
-                    var b = MineBlock(r);
-                    if (b != null)
-                    {
-                        ProcessBlock(r, b);
-                        Broadcast(r, MessageType.Propose, b);
-                    }
-                });
-            }
+                    ProcessBlock(r, b);
+                    Broadcast(r, MessageType.Propose, b);
+                }
+            });
         }
 
         public override void Bind(Instance r)
